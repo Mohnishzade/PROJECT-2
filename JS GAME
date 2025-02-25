@@ -1,0 +1,114 @@
+// Game Settings
+const rows = 6;
+const columns = 7;
+let currentPlayer = 'red'; // Player 1 is 'red', Player 2 is 'yellow'
+let gameBoard = Array(rows).fill().map(() => Array(columns).fill(null));
+let gameOver = false;
+
+// DOM Elements
+const gameBoardElement = document.getElementById('game-board');
+const turnStatusElement = document.getElementById('turn-status');
+const resetButton = document.getElementById('reset-button');
+
+// Create the board
+function createBoard() {
+    gameBoardElement.innerHTML = '';
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < columns; col++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.setAttribute('data-row', row);
+            cell.setAttribute('data-col', col);
+            cell.addEventListener('click', handleCellClick);
+            gameBoardElement.appendChild(cell);
+        }
+    }
+}
+
+// Handle Cell Click
+function handleCellClick(event) {
+    if (gameOver) return;
+
+    const col = event.target.getAttribute('data-col');
+    const row = getAvailableRow(col);
+
+    if (row === -1) return; // No available row
+
+    // Place the piece
+    gameBoard[row][col] = currentPlayer;
+    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    cell.classList.add(currentPlayer);
+
+    // Check for winner
+    if (checkWinner(row, col)) {
+        gameOver = true;
+        turnStatusElement.textContent = `${currentPlayer === 'red' ? 'Player 1' : 'Player 2'} wins!`;
+        return;
+    }
+
+    // Change turn
+    currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+    turnStatusElement.textContent = `${currentPlayer === 'red' ? "Player 1's" : "Player 2's"} turn (${currentPlayer === 'red' ? 'Red' : 'Yellow'})`;
+}
+
+// Get Available Row
+function getAvailableRow(col) {
+    for (let row = rows - 1; row >= 0; row--) {
+        if (gameBoard[row][col] === null) {
+            return row;
+        }
+    }
+    return -1; // Column is full
+}
+
+// Check for Winner
+function checkWinner(row, col) {
+    // Check Horizontal, Vertical, Diagonal (4 directions)
+    return (
+        checkDirection(row, col, 1, 0) ||  // Horizontal
+        checkDirection(row, col, 0, 1) ||  // Vertical
+        checkDirection(row, col, 1, 1) ||  // Diagonal (down-right)
+        checkDirection(row, col, 1, -1)    // Diagonal (up-right)
+    );
+}
+
+// Check a specific direction for 4-in-a-row
+function checkDirection(row, col, rowDir, colDir) {
+    let count = 1; // Include the current piece
+
+    // Check one direction
+    for (let i = 1; i < 4; i++) {
+        const r = row + rowDir * i;
+        const c = col + colDir * i;
+        if (r >= 0 && r < rows && c >= 0 && c < columns && gameBoard[r][c] === currentPlayer) {
+            count++;
+        } else {
+            break;
+        }
+    }
+
+    // Check the opposite direction
+    for (let i = 1; i < 4; i++) {
+        const r = row - rowDir * i;
+        const c = col - colDir * i;
+        if (r >= 0 && r < rows && c >= 0 && c < columns && gameBoard[r][c] === currentPlayer) {
+            count++;
+        } else {
+            break;
+        }
+    }
+
+    return count >= 4;
+}
+
+// Reset Game
+resetButton.addEventListener('click', () => {
+    gameBoard = Array(rows).fill().map(() => Array(columns).fill(null));
+    gameOver = false;
+    currentPlayer = 'red';
+    turnStatusElement.textContent = "Player 1's turn (Red)";
+    createBoard();
+});
+
+// Initialize the game
+createBoard();
