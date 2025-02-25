@@ -1,0 +1,15 @@
+// Initialize cart
+let cartCount = 0;
+let cart = [];
+
+// Function to add items to the cart
+function addToCart(productName, price) {
+    cart.push({ productName, price });
+    cartCount++;
+    updateCartDisplay();
+}
+
+// Update the cart count in the navigation
+function updateCartDisplay() {
+    document.getElementById('cart-count').textContent = cartCount;
+}
