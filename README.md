@@ -1,1 +1,3 @@
-plz check code
+hello world
+hoe to reset
+
